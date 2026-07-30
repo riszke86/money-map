@@ -81,12 +81,29 @@ db.serialize(() => {
         ["Salary", "income"],
         ["Freelance", "income"],
         ["Benefits", "income"],
+        ["Other Income", "income"],
+
         ["Housing", "expense"],
+        ["Rent", "expense"],
+        ["Utilities", "expense"],
+        ["Water", "expense"],
+        ["Electricity", "expense"],
+        ["Gas", "expense"],
+        ["Internet", "expense"],
+
         ["Food", "expense"],
         ["Transport", "expense"],
-        ["Utilities", "expense"],
+        ["Car", "expense"],
+        ["Insurance", "expense"],
+
         ["Children", "expense"],
+        ["Education", "expense"],
+        ["David School", "expense"],
+
+        ["Subscriptions", "expense"],
         ["Entertainment", "expense"],
+        ["Debt", "expense"],
+        ["Health", "expense"],
         ["Other", "expense"]
     ];
 
