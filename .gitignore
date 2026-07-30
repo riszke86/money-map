@@ -1,4 +1,11 @@
+# Dependencies
 node_modules/
-.env
+
+# macOS
 .DS_Store
-database/*.db
+
+# SQLite database
+database/moneymap.db
+*.db
+*.sqlite
+*.sqlite3
