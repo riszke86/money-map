@@ -1,0 +1,479 @@
+<%- include("partials/header") %>
+
+<%- include("partials/navigation") %>
+
+<main class="transactions-page">
+
+    <section class="page-heading">
+        <div>
+            <p class="section-label">
+                Money activity
+            </p>
+
+            <h1>Transactions</h1>
+
+            <p>
+                Record your income and expenses to keep your
+                MoneyMap balance accurate.
+            </p>
+        </div>
+    </section>
+
+
+    <% if (successMessage) { %>
+        <div class="alert alert-success">
+            <%= successMessage %>
+        </div>
+    <% } %>
+
+    <% if (deletedMessage) { %>
+        <div class="alert alert-success">
+            <%= deletedMessage %>
+        </div>
+    <% } %>
+
+    <% if (errorMessage) { %>
+        <div class="alert alert-error">
+            <%= errorMessage %>
+        </div>
+    <% } %>
+
+
+    <!-- ==========================
+         TRANSACTION SUMMARY
+    =========================== -->
+
+    <section class="transaction-summary">
+
+        <article class="summary-card income-card">
+            <span class="summary-label">
+                Total Income
+            </span>
+
+            <strong>
+                £<%= summary.totalIncome.toFixed(2) %>
+            </strong>
+        </article>
+
+        <article class="summary-card expense-card">
+            <span class="summary-label">
+                Total Expenses
+            </span>
+
+            <strong>
+                £<%= summary.totalExpenses.toFixed(2) %>
+            </strong>
+        </article>
+
+        <article class="summary-card balance-card">
+            <span class="summary-label">
+                Current Balance
+            </span>
+
+            <strong>
+                £<%= summary.balance.toFixed(2) %>
+            </strong>
+        </article>
+
+    </section>
+
+
+    <section class="transactions-layout">
+
+        <!-- ==========================
+             ADD TRANSACTION FORM
+        =========================== -->
+
+        <article class="panel transaction-form-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-label">
+                        New entry
+                    </p>
+
+                    <h2>Add Transaction</h2>
+                </div>
+            </div>
+
+            <form
+                action="/transactions"
+                method="POST"
+                class="transaction-form"
+            >
+
+                <div class="form-group">
+                    <label for="type">
+                        Transaction Type
+                    </label>
+
+                    <select
+                        id="type"
+                        name="type"
+                        required
+                    >
+                        <option value="">
+                            Select a type
+                        </option>
+
+                        <option value="income">
+                            Income
+                        </option>
+
+                        <option value="expense">
+                            Expense
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="title">
+                        Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        placeholder="Example: Salary or Groceries"
+                        maxlength="100"
+                        required
+                    >
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="amount">
+                            Amount
+                        </label>
+
+                        <div class="currency-input">
+                            <span>£</span>
+
+                            <input
+                                type="number"
+                                id="amount"
+                                name="amount"
+                                placeholder="0.00"
+                                min="0.01"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="transactionDate">
+                            Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="transactionDate"
+                            name="transactionDate"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+                    <label for="category">
+                        Category
+                    </label>
+
+                    <select
+                        id="category"
+                        name="category"
+                        required
+                    >
+                        <option value="">
+                            Select a category
+                        </option>
+
+                        <optgroup label="Income">
+
+                            <% categories
+                                .filter(category =>
+                                    category.type === "income"
+                                )
+                                .forEach(category => { %>
+
+                                <option
+                                    value="<%= category.name %>"
+                                    data-type="income"
+                                >
+                                    <%= category.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </optgroup>
+
+                        <optgroup label="Expenses">
+
+                            <% categories
+                                .filter(category =>
+                                    category.type === "expense"
+                                )
+                                .forEach(category => { %>
+
+                                <option
+                                    value="<%= category.name %>"
+                                    data-type="expense"
+                                >
+                                    <%= category.name %>
+                                </option>
+
+                            <% }) %>
+
+                        </optgroup>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="notes">
+                        Notes
+                        <span class="optional-label">
+                            Optional
+                        </span>
+                    </label>
+
+                    <textarea
+                        id="notes"
+                        name="notes"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Add any useful details..."
+                    ></textarea>
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="button primary-button full-width-button"
+                >
+                    Add Transaction
+                </button>
+
+            </form>
+
+        </article>
+
+
+        <!-- ==========================
+             TRANSACTION HISTORY
+        =========================== -->
+
+        <article class="panel transaction-history-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-label">
+                        Activity
+                    </p>
+
+                    <h2>Transaction History</h2>
+                </div>
+
+                <span class="record-count">
+                    <%= transactions.length %>
+                    <%= transactions.length === 1
+                        ? "transaction"
+                        : "transactions"
+                    %>
+                </span>
+            </div>
+
+
+            <% if (transactions.length === 0) { %>
+
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        £
+                    </div>
+
+                    <h3>No transactions yet</h3>
+
+                    <p>
+                        Add your first income or expense using
+                        the form.
+                    </p>
+                </div>
+
+            <% } else { %>
+
+                <div class="transaction-list">
+
+                    <% transactions.forEach(transaction => { %>
+
+                        <article class="transaction-item">
+
+                            <div
+                                class="transaction-icon
+                                <%= transaction.type %>-icon"
+                            >
+                                <%= transaction.type === "income"
+                                    ? "+"
+                                    : "−"
+                                %>
+                            </div>
+
+
+                            <div class="transaction-details">
+
+                                <div class="transaction-title-row">
+
+                                    <h3>
+                                        <%= transaction.title %>
+                                    </h3>
+
+                                    <strong
+                                        class="transaction-amount
+                                        <%= transaction.type %>-amount"
+                                    >
+                                        <%= transaction.type === "income"
+                                            ? "+"
+                                            : "−"
+                                        %>£<%= Number(
+                                            transaction.amount
+                                        ).toFixed(2) %>
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="transaction-meta">
+
+                                    <span>
+                                        <%= transaction.category %>
+                                    </span>
+
+                                    <span aria-hidden="true">
+                                        •
+                                    </span>
+
+                                    <time
+                                        datetime="<%= transaction.transaction_date %>"
+                                    >
+                                        <%= new Date(
+                                            transaction.transaction_date +
+                                            "T00:00:00"
+                                        ).toLocaleDateString(
+                                            "en-GB",
+                                            {
+                                                day: "2-digit",
+                                                month: "short",
+                                                year: "numeric"
+                                            }
+                                        ) %>
+                                    </time>
+
+                                </div>
+
+
+                                <% if (transaction.notes) { %>
+                                    <p class="transaction-notes">
+                                        <%= transaction.notes %>
+                                    </p>
+                                <% } %>
+
+                            </div>
+
+
+                            <form
+                                action="/transactions/<%= transaction.id %>/delete"
+                                method="POST"
+                                class="delete-transaction-form"
+                                onsubmit="
+                                    return confirm(
+                                        'Delete this transaction?'
+                                    );
+                                "
+                            >
+                                <button
+                                    type="submit"
+                                    class="delete-button"
+                                    aria-label="Delete <%= transaction.title %>"
+                                    title="Delete transaction"
+                                >
+                                    ×
+                                </button>
+                            </form>
+
+                        </article>
+
+                    <% }) %>
+
+                </div>
+
+            <% } %>
+
+        </article>
+
+    </section>
+
+</main>
+
+<script>
+    const dateInput =
+        document.getElementById("transactionDate");
+
+    if (dateInput && !dateInput.value) {
+        dateInput.value =
+            new Date().toISOString().split("T")[0];
+    }
+
+    const typeSelect =
+        document.getElementById("type");
+
+    const categorySelect =
+        document.getElementById("category");
+
+    function filterCategories() {
+        if (!typeSelect || !categorySelect) {
+            return;
+        }
+
+        const selectedType = typeSelect.value;
+        const options =
+            categorySelect.querySelectorAll("option[data-type]");
+
+        options.forEach(option => {
+            const matchesType =
+                !selectedType ||
+                option.dataset.type === selectedType;
+
+            option.hidden = !matchesType;
+            option.disabled = !matchesType;
+        });
+
+        const selectedOption =
+            categorySelect.options[
+                categorySelect.selectedIndex
+            ];
+
+        if (
+            selectedOption &&
+            selectedOption.dataset.type &&
+            selectedOption.dataset.type !== selectedType
+        ) {
+            categorySelect.value = "";
+        }
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener(
+            "change",
+            filterCategories
+        );
+    }
+</script>
+
+<%- include("partials/footer") %>

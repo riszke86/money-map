@@ -1,3 +1,6 @@
+@import url("./transactions.css");
+
+
 html,
 body {
     background: #2c0f18;
@@ -856,4 +859,79 @@ td {
     td {
         padding: 12px 14px;
     }
+}
+
+/* ===============================
+   Navigation
+================================ */
+
+.main-navigation {
+    background: white;
+    border-bottom: 1px solid #ece7e8;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    width: min(1400px, calc(100% - 40px));
+    margin: auto;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    height: 74px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    text-decoration: none;
+    color: #2c0f18;
+
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.logo img {
+    width: 42px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #6f6065;
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+.nav-links a:hover {
+    color: #7d3148;
+}
+
+.placeholder-page {
+    width: min(1200px, calc(100% - 40px));
+    min-height: 65vh;
+    margin: 0 auto;
+    padding: 60px 0;
+}
+
+.placeholder-page h1 {
+    margin-bottom: 12px;
+}
+
+.placeholder-page p {
+    color: #75666b;
 }

@@ -289,7 +289,6 @@
     display: grid;
     width: 34px;
     height: 34px;
-    padding: 0;
     place-items: center;
     border: 0;
     border-radius: 10px;
@@ -297,10 +296,7 @@
     color: #98878d;
     cursor: pointer;
     font-size: 1.4rem;
-    line-height: 1;
-    transition:
-        background-color 180ms ease,
-        color 180ms ease;
+    transition: background-color 180ms ease, color 180ms ease;
 }
 
 .delete-button:hover {
@@ -327,11 +323,10 @@
 }
 
 .empty-state h3 {
-    margin: 0 0 8px;
+    margin-bottom: 8px;
 }
 
 .empty-state p {
-    margin: 0;
     color: #817277;
 }
 
@@ -343,13 +338,11 @@
 }
 
 .alert-success {
-    border: 1px solid #bad5c5;
     background: #edf7f1;
     color: #346249;
 }
 
 .alert-error {
-    border: 1px solid #e6bec5;
     background: #fceff1;
     color: #8d3547;
 }
