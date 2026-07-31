@@ -389,6 +389,7 @@
     margin: 0;
 }
 
+.paid-button,
 .secondary-button,
 .danger-button {
     min-height: 35px;
@@ -419,6 +420,23 @@
     background: #fff0f2;
 }
 
+
+.paid-button {
+    min-height: 35px;
+    padding: 0 12px;
+    border: 1px solid #b8d7c0;
+    border-radius: 9px;
+    background: #edf8f0;
+    color: #28683a;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.paid-button:hover {
+    background: #dff1e4;
+}
 
 /* ================= RESPONSIVE ================= */
 
@@ -459,4 +477,9 @@
     .primary-button {
         width: 100%;
     }
+}
+
+.status-badge.paid {
+    background: #e4f3e8;
+    color: #26723c;
 }

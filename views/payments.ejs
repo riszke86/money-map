@@ -66,6 +66,12 @@
         </div>
     <% } %>
 
+    <% if (paymentUpdated) { %>
+        <div class="payments-message success-message">
+            Payment status updated.
+        </div>
+    <% } %>
+
     <% if (formError) { %>
         <div class="payments-message error-message">
             <%= formError %>
@@ -430,44 +436,72 @@
                                 </td>
 
                                 <td>
-                                    <span class="status-badge <%= payment.is_active === 1
-                                        ? "active"
-                                        : "inactive" %>">
-                                        <%= payment.is_active === 1
-                                            ? "Active"
-                                            : "Paused" %>
-                                    </span>
+                                    <% if (payment.paid_this_month === 1) { %>
+
+                                        <span class="status-badge paid">
+                                            Paid
+                                        </span>
+
+                                    <% } else { %>
+
+                                        <span class="status-badge <%= payment.is_active === 1
+                                            ? "active"
+                                            : "inactive" %>">
+                                            <%= payment.is_active === 1
+                                                ? "Active"
+                                                : "Paused" %>
+                                        </span>
+
+                                    <% } %>
                                 </td>
 
                                 <td>
                                     <div class="payment-actions">
 
-                                        <form
-                                            action="/payments/<%= payment.id %>/toggle"
-                                            method="POST"
-                                        >
-                                            <button
-                                                type="submit"
-                                                class="secondary-button"
+                                        <% if (
+                                            payment.is_active === 1 &&
+                                            payment.paid_this_month !== 1
+                                        ) { %>
+                                            <form
+                                                action="/payments/<%= payment.id %>/paid"
+                                                method="POST"
+                                                onsubmit="return confirm('Record <%= payment.name %> as paid?');"
                                             >
-                                                <%= payment.is_active === 1
-                                                    ? "Pause"
-                                                    : "Activate" %>
-                                            </button>
-                                        </form>
+                                                <button
+                                                    type="submit"
+                                                    class="paid-button"
+                                                >
+                                                    Mark Paid
+                                                </button>
+                                            </form>
+                                        <% } %>
 
-                                        <form
-                                            action="/payments/<%= payment.id %>/delete"
-                                            method="POST"
-                                            onsubmit="return confirm('Delete this recurring payment?');"
-                                        >
-                                            <button
-                                                type="submit"
-                                                class="danger-button"
+                                            <form
+                                                action="/payments/<%= payment.id %>/toggle"
+                                                method="POST"
                                             >
-                                                Delete
-                                            </button>
-                                        </form>
+                                                <button
+                                                    type="submit"
+                                                    class="secondary-button"
+                                                >
+                                                    <%= payment.is_active === 1
+                                                        ? "Pause"
+                                                        : "Activate" %>
+                                                </button>
+                                            </form>
+
+                                            <form
+                                                action="/payments/<%= payment.id %>/delete"
+                                                method="POST"
+                                                onsubmit="return confirm('Delete this recurring payment?');"
+                                            >
+                                                <button
+                                                    type="submit"
+                                                    class="danger-button"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
 
                                     </div>
                                 </td>

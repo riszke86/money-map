@@ -215,19 +215,33 @@ app.get("/payments", async (req, res) => {
     try {
         const payments = await dbAll(`
             SELECT
-                id,
-                name,
-                amount,
-                category,
-                frequency,
-                next_payment_date,
-                reminder_days,
-                is_active
-            FROM recurring_payments
+                rp.id,
+                rp.name,
+                rp.amount,
+                rp.category,
+                rp.frequency,
+                rp.next_payment_date,
+                rp.reminder_days,
+                rp.is_active,
+
+                CASE
+                    WHEN (
+                        SELECT COUNT(*)
+                        FROM payment_records pr
+                        WHERE pr.recurring_payment_id = rp.id
+                            AND strftime('%Y-%m', pr.paid_date)
+                                = strftime('%Y-%m', 'now', 'localtime')
+                    ) > 0
+                    THEN 1
+                    ELSE 0
+                END AS paid_this_month
+
+            FROM recurring_payments rp
+
             ORDER BY
-                is_active DESC,
-                date(next_payment_date) ASC,
-                name ASC
+                rp.is_active DESC,
+                date(rp.next_payment_date) ASC,
+                rp.name ASC
         `);
 
         const categories = await dbAll(`
@@ -336,6 +350,7 @@ app.get("/payments", async (req, res) => {
             paymentAdded: req.query.added === "true",
             paymentDeleted: req.query.deleted === "true",
             paymentUpdated: req.query.updated === "true",
+            paymentPaid: req.query.paid === "true",
             formError: null,
             formData: {}
         });
@@ -434,6 +449,7 @@ app.post("/payments", async (req, res) => {
                 paymentAdded: false,
                 paymentDeleted: false,
                 paymentUpdated: false,
+                paymentPaid: false,
                 formError:
                     "Please complete all required fields correctly.",
                 formData: req.body
@@ -510,6 +526,138 @@ app.post("/payments/:id/toggle", async (req, res) => {
 
         res.status(500).send(
             "The payment status could not be updated."
+        );
+    }
+});
+
+app.post("/payments/:id/paid", async (req, res) => {
+    const paymentId = Number(req.params.id);
+
+    if (!Number.isInteger(paymentId) || paymentId <= 0) {
+        return res.status(400).send(
+            "Invalid payment ID."
+        );
+    }
+
+    try {
+        const payment = await dbGet(`
+            SELECT
+                id,
+                name,
+                amount,
+                category,
+                frequency,
+                next_payment_date,
+                is_active
+            FROM recurring_payments
+            WHERE id = ?
+        `, [paymentId]);
+
+        if (!payment) {
+            return res.status(404).send(
+                "Recurring payment not found."
+            );
+        }
+
+        if (payment.is_active !== 1) {
+            return res.status(400).send(
+                "A paused payment cannot be marked as paid."
+            );
+        }
+
+        const existingPaymentRecord = await dbGet(`
+            SELECT id
+            FROM payment_records
+            WHERE recurring_payment_id = ?
+                AND strftime('%Y-%m', paid_date)
+                    = strftime('%Y-%m', 'now', 'localtime')
+        `, [paymentId]);
+
+        if (existingPaymentRecord) {
+            return res.redirect("/payments?paid=true");
+        }
+
+        await dbRun("BEGIN TRANSACTION");
+
+        try {
+            await dbRun(`
+                INSERT INTO transactions (
+                    type,
+                    title,
+                    amount,
+                    category,
+                    transaction_date,
+                    notes
+                )
+                VALUES (
+                    'expense',
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?
+                )
+            `, [
+                payment.name,
+                payment.amount,
+                payment.category,
+                new Date().toISOString().slice(0, 10),
+                `Automatically recorded from recurring payment #${payment.id}`
+            ]);
+
+            await dbRun(`
+                INSERT INTO payment_records (
+                    recurring_payment_id,
+                    payment_name,
+                    amount,
+                    category,
+                    paid_date
+                )
+                VALUES (?, ?, ?, ?, ?)
+            `, [
+                payment.id,
+                payment.name,
+                payment.amount,
+                payment.category,
+                new Date().toISOString().slice(0, 10)
+            ]);
+
+            await dbRun(`
+                UPDATE recurring_payments
+                SET next_payment_date =
+                    CASE frequency
+                        WHEN 'weekly'
+                            THEN date(next_payment_date, '+7 days')
+
+                        WHEN 'monthly'
+                            THEN date(next_payment_date, '+1 month')
+
+                        WHEN 'quarterly'
+                            THEN date(next_payment_date, '+3 months')
+
+                        WHEN 'yearly'
+                            THEN date(next_payment_date, '+1 year')
+
+                        ELSE next_payment_date
+                    END
+                WHERE id = ?
+            `, [paymentId]);
+
+            await dbRun("COMMIT");
+        } catch (transactionError) {
+            await dbRun("ROLLBACK");
+            throw transactionError;
+        }
+
+        res.redirect("/payments?paid=true");
+    } catch (error) {
+        console.error(
+            "Payment could not be marked as paid:",
+            error.message
+        );
+
+        res.status(500).send(
+            "The recurring payment could not be recorded."
         );
     }
 });

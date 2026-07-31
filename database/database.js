@@ -53,6 +53,22 @@ db.serialize(() => {
         )
     `);
 
+db.run(`
+    CREATE TABLE IF NOT EXISTS payment_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recurring_payment_id INTEGER NOT NULL,
+        payment_name TEXT NOT NULL,
+        amount REAL NOT NULL,
+        category TEXT NOT NULL,
+        paid_date TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (recurring_payment_id)
+            REFERENCES recurring_payments(id)
+            ON DELETE CASCADE
+    )
+`);
+
     db.run(`
         CREATE TABLE IF NOT EXISTS savings_goals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,6 +90,22 @@ db.serialize(() => {
                 CHECK(type IN ('income', 'expense')),
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(name, type)
+        )
+    `);
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS payment_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recurring_payment_id INTEGER NOT NULL,
+            payment_name TEXT NOT NULL,
+            amount REAL NOT NULL,
+            category TEXT NOT NULL,
+            paid_date TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (recurring_payment_id)
+            REFERENCES recurring_payments(id)
+            ON DELETE CASCADE
         )
     `);
 
