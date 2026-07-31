@@ -1,13 +1,345 @@
+<%
+    const formatMoney = (value) => {
+        return Number(value || 0).toLocaleString(
+            "en-GB",
+            {
+                style: "currency",
+                currency: "GBP"
+            }
+        );
+    };
+
+    const formatDate = (value) => {
+        if (!value) {
+            return "No target date";
+        }
+
+        return new Date(
+            `${value}T00:00:00`
+        ).toLocaleDateString(
+            "en-GB",
+            {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }
+        );
+    };
+%>
+
 <%- include("partials/header") %>
 
 <%- include("partials/navigation") %>
 
-<main class="placeholder-page">
-    <h1>Savings</h1>
+<main class="savings-page page-container">
 
-    <p>
-        Savings goals and forecasts will be added here.
-    </p>
+    <section class="savings-hero">
+        <div>
+            <p class="section-label">
+                Financial Goals
+            </p>
+
+            <h1>
+                Savings
+            </h1>
+
+            <p>
+                Create savings goals, track your progress and
+                calculate how much you need to save each month.
+            </p>
+        </div>
+    </section>
+
+    <% if (goalAdded) { %>
+        <div class="savings-message success-message">
+            Savings goal created successfully.
+        </div>
+    <% } %>
+
+    <section class="savings-summary">
+
+        <article class="savings-summary-card featured">
+            <span>
+                Total saved
+            </span>
+
+            <strong>
+                <%= formatMoney(totalSaved) %>
+            </strong>
+
+            <p>
+                Across all savings goals
+            </p>
+        </article>
+
+        <article class="savings-summary-card">
+            <span>
+                Total target
+            </span>
+
+            <strong>
+                <%= formatMoney(totalTarget) %>
+            </strong>
+
+            <p>
+                Combined goal value
+            </p>
+        </article>
+
+        <article class="savings-summary-card">
+            <span>
+                Remaining
+            </span>
+
+            <strong>
+                <%= formatMoney(totalRemaining) %>
+            </strong>
+
+            <p>
+                Still needed to complete your goals
+            </p>
+        </article>
+
+    </section>
+
+    <section class="savings-layout">
+
+        <section class="add-goal-panel">
+
+            <div class="section-heading">
+                <div>
+                    <p class="section-label">
+                        Create a new goal
+                    </p>
+
+                    <h2>
+                        New Savings Goal
+                    </h2>
+                </div>
+            </div>
+
+            <form
+                action="/savings"
+                method="POST"
+                class="savings-form"
+            >
+
+                <div class="form-group">
+                    <label for="name">
+                        Goal name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Example: Emergency Fund"
+                        required
+                    >
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label for="targetAmount">
+                            Target amount
+                        </label>
+
+                        <input
+                            type="number"
+                            id="targetAmount"
+                            name="targetAmount"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="0.00"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="currentAmount">
+                            Already saved
+                        </label>
+
+                        <input
+                            type="number"
+                            id="currentAmount"
+                            name="currentAmount"
+                            min="0"
+                            step="0.01"
+                            value="0"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="targetDate">
+                        Target date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="targetDate"
+                        name="targetDate"
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                >
+                    Create Savings Goal
+                </button>
+
+            </form>
+
+        </section>
+
+        <section class="savings-goals-panel">
+
+            <div class="section-heading">
+                <div>
+                    <p class="section-label">
+                        Your progress
+                    </p>
+
+                    <h2>
+                        Savings Goals
+                    </h2>
+                </div>
+
+                <span class="goal-count">
+                    <%= savingsGoals.length %>
+                    goal<%= savingsGoals.length === 1
+                        ? ""
+                        : "s" %>
+                </span>
+            </div>
+
+            <% if (savingsGoals.length === 0) { %>
+
+                <div class="empty-state">
+                    <h3>
+                        No savings goals yet
+                    </h3>
+
+                    <p>
+                        Create your first goal to begin tracking
+                        your savings progress.
+                    </p>
+                </div>
+
+            <% } else { %>
+
+                <div class="savings-goal-list">
+
+                    <% savingsGoals.forEach((goal) => { %>
+
+                        <article class="savings-goal-card">
+
+                            <div class="goal-heading">
+                                <div>
+                                    <h3>
+                                        <%= goal.name %>
+                                    </h3>
+
+                                    <span>
+                                        <%= formatDate(
+                                            goal.target_date
+                                        ) %>
+                                    </span>
+                                </div>
+
+                                <strong>
+                                    <%= goal.progress_percentage %>%
+                                </strong>
+                            </div>
+
+                            <div
+                                class="goal-progress-track"
+                                role="progressbar"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                aria-valuenow="<%= goal.progress_percentage %>"
+                            >
+                                <div
+                                    class="goal-progress-value"
+                                    style="width: <%= goal.progress_percentage %>%"
+                                ></div>
+                            </div>
+
+                            <div class="goal-values">
+
+                                <div>
+                                    <span>
+                                        Saved
+                                    </span>
+
+                                    <strong>
+                                        <%= formatMoney(
+                                            goal.current_amount
+                                        ) %>
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>
+                                        Target
+                                    </span>
+
+                                    <strong>
+                                        <%= formatMoney(
+                                            goal.target_amount
+                                        ) %>
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>
+                                        Remaining
+                                    </span>
+
+                                    <strong>
+                                        <%= formatMoney(
+                                            goal.remaining_amount
+                                        ) %>
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                            <% if (
+                                goal.target_date &&
+                                goal.remaining_amount > 0
+                            ) { %>
+
+                                <div class="monthly-saving-needed">
+                                    Save approximately
+
+                                    <strong>
+                                        <%= formatMoney(
+                                            goal.monthly_needed
+                                        ) %>
+                                    </strong>
+
+                                    per month to reach this goal.
+                                </div>
+
+                            <% } %>
+
+                        </article>
+
+                    <% }) %>
+
+                </div>
+
+            <% } %>
+
+        </section>
+
+    </section>
+
 </main>
 
 <%- include("partials/footer") %>

@@ -1,0 +1,416 @@
+/* =========================================================
+   SAVINGS PAGE
+========================================================= */
+
+.savings-page {
+    padding-top: 34px;
+    padding-bottom: 60px;
+}
+
+/* ================= HERO ================= */
+
+.savings-hero {
+    margin-bottom: 28px;
+}
+
+.savings-hero h1 {
+    margin: 8px 0 14px;
+
+    color: #4f1224;
+
+    font-size: clamp(3rem, 6vw, 5.2rem);
+    line-height: 0.98;
+}
+
+.savings-hero > div > p:last-child {
+    max-width: 760px;
+    margin: 0;
+
+    color: #756d70;
+
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+/* ================= MESSAGE ================= */
+
+.savings-message {
+    margin-bottom: 24px;
+    padding: 14px 18px;
+
+    border: 1px solid rgba(60, 130, 88, 0.22);
+    border-radius: 14px;
+
+    background: #edf7f0;
+    color: #2f7448;
+
+    font-weight: 700;
+}
+
+/* ================= SUMMARY ================= */
+
+.savings-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+
+    margin-bottom: 30px;
+}
+
+.savings-summary-card {
+    position: relative;
+    overflow: hidden;
+
+    min-height: 190px;
+    padding: 30px;
+
+    border: 1px solid rgba(93, 34, 52, 0.08);
+    border-radius: 24px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 18px 40px rgba(75, 41, 49, 0.08);
+}
+
+.savings-summary-card::after {
+    content: "";
+
+    position: absolute;
+    right: -45px;
+    bottom: -55px;
+
+    width: 150px;
+    height: 150px;
+
+    border-radius: 50%;
+
+    background: rgba(100, 27, 48, 0.05);
+}
+
+.savings-summary-card span {
+    display: block;
+    margin-bottom: 20px;
+
+    color: #756d70;
+
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.savings-summary-card strong {
+    display: block;
+
+    color: #4f1224;
+
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.savings-summary-card p {
+    position: relative;
+    z-index: 1;
+
+    margin: 18px 0 0;
+
+    color: #7f7478;
+    font-weight: 600;
+}
+
+.savings-summary-card.featured {
+    border: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            #551426,
+            #7d2a3f
+        );
+
+    color: #ffffff;
+}
+
+.savings-summary-card.featured span,
+.savings-summary-card.featured strong,
+.savings-summary-card.featured p {
+    color: #ffffff;
+}
+
+.savings-summary-card.featured::after {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* ================= LAYOUT ================= */
+
+.savings-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.45fr);
+    gap: 28px;
+    align-items: start;
+}
+
+.add-goal-panel,
+.savings-goals-panel {
+    padding: 32px;
+
+    border: 1px solid rgba(93, 34, 52, 0.08);
+    border-radius: 26px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 18px 45px rgba(75, 41, 49, 0.07);
+}
+
+/* ================= HEADINGS ================= */
+
+.savings-page .section-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+
+    margin-bottom: 26px;
+}
+
+.savings-page .section-heading h2 {
+    margin: 8px 0 0;
+
+    color: #5a172a;
+
+    font-size: 2rem;
+    line-height: 1.1;
+}
+
+.goal-count {
+    padding: 9px 13px;
+
+    border-radius: 999px;
+
+    background: #f1e8eb;
+    color: #6b2034;
+
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+/* ================= FORM ================= */
+
+.savings-form {
+    display: grid;
+    gap: 20px;
+}
+
+.savings-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.savings-form .form-group {
+    display: grid;
+    gap: 9px;
+}
+
+.savings-form label {
+    color: #43212b;
+
+    font-weight: 800;
+}
+
+.savings-form input {
+    width: 100%;
+    min-height: 58px;
+    padding: 0 16px;
+
+    border: 1px solid #dbcbd0;
+    border-radius: 14px;
+
+    background: #fffdfd;
+    color: #30262a;
+
+    font: inherit;
+}
+
+.savings-form input:focus {
+    outline: 3px solid rgba(100, 27, 48, 0.11);
+    border-color: #7a2a3d;
+}
+
+/* ================= GOALS ================= */
+
+.savings-goal-list {
+    display: grid;
+    gap: 20px;
+}
+
+.savings-goal-card {
+    padding: 24px;
+
+    border: 1px solid #eadde1;
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fffdfd,
+            #fbf6f7
+        );
+}
+
+.goal-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+
+    margin-bottom: 18px;
+}
+
+.goal-heading h3 {
+    margin: 0 0 6px;
+
+    color: #4f1224;
+
+    font-size: 1.35rem;
+}
+
+.goal-heading span {
+    color: #8a7e82;
+    font-size: 0.92rem;
+}
+
+.goal-heading > strong {
+    color: #6f2035;
+
+    font-size: 1.35rem;
+}
+
+.goal-progress-track {
+    overflow: hidden;
+
+    width: 100%;
+    height: 13px;
+
+    margin-bottom: 22px;
+
+    border-radius: 999px;
+
+    background: #eadfe2;
+}
+
+.goal-progress-value {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #6a1c31,
+            #a45b6c
+        );
+
+    transition: width 0.5s ease;
+}
+
+.goal-values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.goal-values > div {
+    padding: 15px;
+
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+.goal-values span {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #8b7f83;
+
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.goal-values strong {
+    color: #4f1224;
+}
+
+.monthly-saving-needed {
+    margin-top: 18px;
+    padding: 15px 17px;
+
+    border-radius: 14px;
+
+    background: #edf4ef;
+    color: #3c6d50;
+
+    line-height: 1.5;
+}
+
+.monthly-saving-needed strong {
+    color: #285e3f;
+}
+
+/* ================= EMPTY STATE ================= */
+
+.savings-page .empty-state {
+    padding: 34px;
+
+    border: 1px dashed #d8c3c9;
+    border-radius: 18px;
+
+    text-align: center;
+}
+
+.savings-page .empty-state h3 {
+    margin-top: 0;
+
+    color: #5a172a;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1000px) {
+    .savings-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .savings-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .savings-page {
+        padding-top: 22px;
+    }
+
+    .add-goal-panel,
+    .savings-goals-panel {
+        padding: 22px;
+        border-radius: 20px;
+    }
+
+    .savings-form .form-row,
+    .goal-values {
+        grid-template-columns: 1fr;
+    }
+
+    .goal-heading {
+        flex-direction: column;
+    }
+
+    .savings-summary-card {
+        min-height: auto;
+        padding: 24px;
+    }
+}

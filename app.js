@@ -789,10 +789,177 @@ app.post("/payments/:id/delete", async (req, res) => {
 
 // ================= SAVINGS =================
 
-app.get("/savings", (req, res) => {
-    res.render("savings", {
-        pageTitle: "Savings | MoneyMap"
-    });
+app.get("/savings", async (req, res) => {
+    try {
+        const savingsGoals = await dbAll(`
+            SELECT
+                id,
+                name,
+                target_amount,
+                current_amount,
+                target_date,
+                created_at
+            FROM savings_goals
+            ORDER BY created_at DESC
+        `);
+
+        const formattedGoals = savingsGoals.map((goal) => {
+            const targetAmount =
+                Number(goal.target_amount) || 0;
+
+            const currentAmount =
+                Number(goal.current_amount) || 0;
+
+            const remainingAmount = Math.max(
+                targetAmount - currentAmount,
+                0
+            );
+
+            const progressPercentage =
+                targetAmount > 0
+                    ? Math.min(
+                        Math.round(
+                            (currentAmount / targetAmount) * 100
+                        ),
+                        100
+                    )
+                    : 0;
+
+            let monthlyNeeded = 0;
+
+            if (
+                goal.target_date &&
+                remainingAmount > 0
+            ) {
+                const today = new Date();
+
+                const targetDate = new Date(
+                    `${goal.target_date}T00:00:00`
+                );
+
+                const monthsRemaining = Math.max(
+                    (
+                        targetDate.getFullYear() -
+                        today.getFullYear()
+                    ) * 12 +
+                    (
+                        targetDate.getMonth() -
+                        today.getMonth()
+                    ),
+                    1
+                );
+
+                monthlyNeeded =
+                    remainingAmount / monthsRemaining;
+            }
+
+            return {
+                ...goal,
+                target_amount: targetAmount,
+                current_amount: currentAmount,
+                remaining_amount: remainingAmount,
+                progress_percentage: progressPercentage,
+                monthly_needed: monthlyNeeded
+            };
+        });
+
+        const totalTarget = formattedGoals.reduce(
+            (total, goal) =>
+                total + goal.target_amount,
+            0
+        );
+
+        const totalSaved = formattedGoals.reduce(
+            (total, goal) =>
+                total + goal.current_amount,
+            0
+        );
+
+        res.render("savings", {
+            pageTitle: "Savings | MoneyMap",
+
+            savingsGoals: formattedGoals,
+            totalTarget,
+            totalSaved,
+            totalRemaining: Math.max(
+                totalTarget - totalSaved,
+                0
+            ),
+
+            goalAdded:
+                req.query.added === "true",
+
+            formError: null,
+            formData: {}
+        });
+    } catch (error) {
+        console.error(
+            "Savings goals could not be loaded:",
+            error.message
+        );
+
+        res.status(500).send(
+            "The savings page could not be loaded."
+        );
+    }
+});
+
+app.post("/savings", async (req, res) => {
+    const {
+        name,
+        targetAmount,
+        currentAmount,
+        targetDate
+    } = req.body;
+
+    const cleanName = String(name || "").trim();
+
+    const numericTargetAmount =
+        Number(targetAmount);
+
+    const numericCurrentAmount =
+        Number(currentAmount) || 0;
+
+    if (
+        !cleanName ||
+        !Number.isFinite(numericTargetAmount) ||
+        numericTargetAmount <= 0 ||
+        !Number.isFinite(numericCurrentAmount) ||
+        numericCurrentAmount < 0 ||
+        numericCurrentAmount > numericTargetAmount
+    ) {
+        return res.status(400).send(
+            "Please enter valid savings goal details."
+        );
+    }
+
+    try {
+        await dbRun(`
+            INSERT INTO savings_goals (
+                name,
+                target_amount,
+                current_amount,
+                target_date
+            )
+            VALUES (?, ?, ?, ?)
+        `, [
+            cleanName,
+            numericTargetAmount,
+            numericCurrentAmount,
+            targetDate || null
+        ]);
+
+        res.redirect("/savings?added=true");
+    } catch (error) {
+        console.error(
+            "Savings goal could not be added:",
+            error.message
+        );
+
+        res.status(500).send(
+            "The savings goal could not be added."
+        );
+    }
 });
 
 // ================= START SERVER =================

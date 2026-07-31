@@ -79,6 +79,15 @@
     border-top: 4px solid #b08a55;
 }
 
+/* Keep the Current Balance card readable */
+.transaction-summary .balance-card .summary-label {
+    color: #75666b;
+}
+
+.transaction-summary .balance-card strong {
+    color: #2c0f18;
+}
+
 .transactions-layout {
     display: grid;
     grid-template-columns: minmax(320px, 0.75fr) minmax(0, 1.4fr);
