@@ -390,9 +390,7 @@
                                 <span>
                                     <%= payment.category %>
                                     ·
-                                    <%= formatDate(
-                                        payment.next_payment_date
-                                    ) %>
+                                    <%= payment.due_label %>
                                 </span>
                             </div>
 
@@ -405,11 +403,11 @@
 
                 <div class="upcoming-summary">
                     <span>
-                        Due within 30 days
+                        Total due this week
                     </span>
 
                     <strong>
-                        <%= formatMoney(upcomingTotal) %>
+                        <%= formatMoney(weeklyDueTotal) %>
                     </strong>
                 </div>
 
@@ -444,6 +442,64 @@
                 </div>
             <% } %>
         </article>
+
+        <!-- MONTHLY SPENDING TREND -->
+
+        <article class="dashboard-panel spending-trend-panel">
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-label">
+                        Spending history
+                    </p>
+
+                    <h2>
+                        Monthly Spending Trend
+                    </h2>
+                </div>
+
+                <span>
+                    Last 7 months
+                </span>
+            </div>
+
+            <p class="chart-description">
+                Compare your recorded expenses across recent months.
+            </p>
+
+            <div class="spending-chart-wrapper">
+                <canvas
+                    id="monthlySpendingChart"
+                    aria-label="Monthly spending trend"
+                    data-spending="<%= encodeURIComponent(
+                        JSON.stringify(
+                            monthlySpendingTrend.map(item => {
+                                const [year, month] =
+                                    item.month_key.split("-");
+
+                                return {
+                                    month: new Date(
+                                        Number(year),
+                                        Number(month) - 1,
+                                        1
+                                    ).toLocaleDateString(
+                                        "en-GB",
+                                        {
+                                            month: "short"
+                                        }
+                                    ),
+
+                                    amount:
+                                        Number(item.total_spending) || 0
+                                };
+                            })
+                        )
+                    ) %>"
+                ></canvas>
+            </div>
+
+        </article>
+
 
         <!-- FINANCIAL FORECAST -->
 
@@ -611,6 +667,7 @@
     }
 </script>
 
+<script src="/js/charts.js"></script>
 <script src="/js/intro.js"></script>
 
 <%- include("partials/footer") %>

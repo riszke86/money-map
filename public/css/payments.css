@@ -483,3 +483,24 @@
     background: #e4f3e8;
     color: #26723c;
 }
+
+/* ================= PAYMENTS CHART ================= */
+
+.payments-chart-wrapper {
+    position: relative;
+
+    width: 100%;
+    height: 270px;
+
+    margin: 8px 0 24px;
+    padding: 12px;
+
+    border-radius: 16px;
+
+    background: #fcf8f6;
+}
+
+.payments-chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}

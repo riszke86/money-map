@@ -824,3 +824,58 @@
     font-size: 0.9rem;
     line-height: 1.45;
 }
+
+/* =========================================================
+   MONTHLY SPENDING TREND
+========================================================= */
+
+.spending-trend-panel {
+    grid-column: span 12;
+}
+
+.spending-trend-panel .panel-heading {
+    margin-bottom: 8px;
+}
+
+.spending-trend-panel .section-label {
+    margin: 0 0 7px;
+}
+
+.chart-description {
+    margin: 0 0 22px;
+
+    color: var(--muted);
+
+    font-size: 0.9rem;
+}
+
+.spending-chart-wrapper {
+    position: relative;
+
+    width: 100%;
+    height: 340px;
+
+    padding: 20px 18px 10px;
+
+    border: 1px solid rgba(110, 38, 57, 0.06);
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fffdfc,
+            #fbf6f3
+        );
+}
+
+.spending-chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+@media (max-width: 650px) {
+    .spending-chart-wrapper {
+        height: 280px;
+        padding: 14px 8px 8px;
+    }
+}

@@ -66,12 +66,6 @@
         </div>
     <% } %>
 
-    <% if (paymentUpdated) { %>
-        <div class="payments-message success-message">
-            Payment status updated.
-        </div>
-    <% } %>
-
     <% if (formError) { %>
         <div class="payments-message error-message">
             <%= formError %>
@@ -314,14 +308,24 @@
             </div>
 
             <% if (categoryTotals.length === 0) { %>
+
                 <p class="empty-state">
                     Add recurring payments to see your category totals.
                 </p>
+
             <% } else { %>
+
+                <div class="payments-chart-wrapper">
+                    <canvas
+                        id="paymentsCategoryChart"
+                        aria-label="Recurring payments by category"
+                    ></canvas>
+                </div>
 
                 <div class="category-breakdown-list">
 
                     <% categoryTotals.forEach(item => { %>
+
                         <div class="category-breakdown-item">
 
                             <div>
@@ -330,7 +334,7 @@
                                 </strong>
 
                                 <span>
-                                    Monthly estimate
+                                    Average monthly cost
                                 </span>
                             </div>
 
@@ -339,6 +343,7 @@
                             </strong>
 
                         </div>
+
                     <% }) %>
 
                 </div>
@@ -521,5 +526,90 @@
     </section>
 
 </main>
+
+<% if (categoryTotals.length > 0) { %>
+    <script>
+        const categoryLabels = <%- JSON.stringify(
+            categoryTotals.map(item => item.category)
+        ) %>;
+
+        const categoryValues = <%- JSON.stringify(
+            categoryTotals.map(item =>
+                Number(item.monthly_total)
+            )
+        ) %>;
+
+        const paymentsChartCanvas =
+            document.getElementById(
+                "paymentsCategoryChart"
+            );
+
+        if (paymentsChartCanvas) {
+            new Chart(paymentsChartCanvas, {
+                type: "doughnut",
+
+                data: {
+                    labels: categoryLabels,
+
+                    datasets: [
+                        {
+                            data: categoryValues,
+
+                            backgroundColor: [
+                                "#641b30",
+                                "#a95d6f",
+                                "#c99d70",
+                                "#d9bda7",
+                                "#8f6d75",
+                                "#4f775f",
+                                "#b88947"
+                            ],
+
+                            borderWidth: 0,
+
+                            hoverOffset: 7
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    cutout: "68%",
+
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 9,
+                                padding: 18
+                            }
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label(context) {
+                                    const value =
+                                        Number(context.raw) || 0;
+
+                                    return `${context.label}: ${value.toLocaleString(
+                                        "en-GB",
+                                        {
+                                            style: "currency",
+                                            currency: "GBP"
+                                        }
+                                    )}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+<% } %>
 
 <%- include("partials/footer") %>

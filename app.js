@@ -130,13 +130,47 @@ app.get("/", async (req, res) => {
                 category,
                 frequency,
                 next_payment_date,
-                reminder_days
+                reminder_days,
+
+                CASE
+                    WHEN date(next_payment_date)
+                        = date('now', 'localtime')
+                        THEN 'Today'
+
+                    WHEN date(next_payment_date)
+                        = date('now', 'localtime', '+1 day')
+                        THEN 'Tomorrow'
+
+                    ELSE
+                        'In ' ||
+                        CAST(
+                            julianday(date(next_payment_date)) -
+                            julianday(date('now', 'localtime'))
+                            AS INTEGER
+                        ) ||
+                        ' days'
+                END AS due_label
+
             FROM recurring_payments
+
             WHERE is_active = 1
-              AND date(next_payment_date)
-                  >= date('now', 'localtime')
+                AND date(next_payment_date)
+                    >= date('now', 'localtime')
+
             ORDER BY date(next_payment_date) ASC
             LIMIT 5
+        `);
+
+        const weeklyPaymentTotal = await dbGet(`
+            SELECT
+                COALESCE(SUM(amount), 0) AS weekly_total
+
+            FROM recurring_payments
+
+            WHERE is_active = 1
+                AND date(next_payment_date)
+                    BETWEEN date('now', 'localtime')
+                    AND date('now', 'localtime', '+7 days')
         `);
 
         const savingsGoals = await dbAll(`
@@ -167,6 +201,59 @@ app.get("/", async (req, res) => {
             LIMIT 6
         `);
 
+        const monthlySpendingTrend = await dbAll(`
+            WITH RECURSIVE months (
+                month_number,
+                month_start
+            ) AS (
+                SELECT
+                    0,
+                    date(
+                        'now',
+                        'localtime',
+                        'start of month',
+                        '-6 months'
+                    )
+
+                UNION ALL
+
+                SELECT
+                    month_number + 1,
+                    date(month_start, '+1 month')
+                FROM months
+                WHERE month_number < 6
+            )
+
+            SELECT
+                strftime('%Y-%m', months.month_start)
+                    AS month_key,
+
+                COALESCE(
+                    ROUND(
+                        SUM(
+                            CASE
+                                WHEN transactions.type = 'expense'
+                                    THEN transactions.amount
+                                ELSE 0
+                            END
+                        ),
+                        2
+                    ),
+                    0
+                ) AS total_spending
+
+            FROM months
+
+            LEFT JOIN transactions
+                ON strftime(
+                    '%Y-%m',
+                    transactions.transaction_date
+                ) = strftime('%Y-%m', months.month_start)
+
+            GROUP BY months.month_start
+            ORDER BY months.month_start ASC
+        `);
+
         const currentBalance =
             Number(balanceResult.current_balance) || 0;
 
@@ -179,8 +266,16 @@ app.get("/", async (req, res) => {
         const upcomingTotal =
             Number(upcomingPaymentTotal.upcoming_total) || 0;
 
+        const weeklyDueTotal =
+            Number(weeklyPaymentTotal.weekly_total) || 0;
+
         const safeAvailableBalance =
             currentBalance - upcomingTotal;
+
+        console.log(
+            "Monthly spending trend:",
+            monthlySpendingTrend
+        );
 
         res.render("dashboard", {
             pageTitle: "MoneyMap Dashboard",
@@ -189,11 +284,13 @@ app.get("/", async (req, res) => {
             monthlyIncome,
             monthlyExpenses,
             upcomingTotal,
+            weeklyDueTotal,
             safeAvailableBalance,
 
             upcomingPayments,
             savingsGoals,
-            recentTransactions
+            recentTransactions,
+            monthlySpendingTrend
         });
     } catch (error) {
         console.error(
